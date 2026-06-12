@@ -11,6 +11,7 @@ import TimelineSection from './components/TimelineSection';
 import GallerySection from './components/GallerySection';
 import RSVPSection from './components/RSVPSection';
 import WhatsAppButton from './components/WhatsAppButton';
+import SongRequestSection from './components/SongRequestSection';
 
 export default function Home() {
   const [searchParams] = useSearchParams();
@@ -28,6 +29,7 @@ export default function Home() {
       <LocationSection />
       {/* <TimelineSection /> */}
       <GallerySection />
+      <SongRequestSection/>
       <GiftSection />
       <RSVPSection />
       <WhatsAppButton />

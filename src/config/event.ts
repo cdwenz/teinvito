@@ -2,7 +2,7 @@
 // CONFIGURACIÓN DEL EVENTO
 // Modifica este archivo para reutilizar la plantilla en otros eventos
 // ============================================================
-import antoPhoto from "../assets/antoCuadrado.jpeg";
+import antoPhoto from "../assets/antogpt.png";
 export const eventConfig = {
   // --- Datos de la cumpleañera ---
   birthday: {
@@ -82,6 +82,14 @@ export const eventConfig = {
   whatsapp: {
     number: "5492994228623",
     message: "¡Hola! Quería confirmar mi asistencia a tus 16",
+  },
+
+  // --- Pedidos de canciones ---
+  songRequests: {
+    title: "¿Qué canción no puede faltar?",
+    subtitle: "Dejame tu tema favorito y lo sumo a la playlist de la fiesta. ¡La música la elegimos entre todos!",
+    spotifyPlaylistUrl: "",
+    formUrl: "https://readdy.ai/api/form/d8m0dia1heuq7aefie90",
   },
 
   // --- Panel admin ---
