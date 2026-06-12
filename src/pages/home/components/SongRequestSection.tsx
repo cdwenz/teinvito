@@ -119,7 +119,7 @@ export default function SongRequestSection() {
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}
         >
-          <div className="flex items-center justify-between mb-5">
+          {/* <div className="flex items-center justify-between mb-5">
             <h3 className="font-label text-xs tracking-[0.2em] uppercase text-secondary-500 flex items-center gap-2">
               <i className="ri-play-list-2-line" style={{ fontSize: '16px' }}></i>
               Playlist de la fiesta
@@ -127,22 +127,22 @@ export default function SongRequestSection() {
             <span className="font-label text-xs text-foreground-400">
               {mockSongRequests.length} canciones
             </span>
-          </div>
+          </div> */}
 
-          <div className="bg-background-100 rounded-xl border border-background-200/70 overflow-hidden">
-            {mockSongRequests.map((song, i) => (
+          {/* <div className="bg-background-100 rounded-xl border border-background-200/70 overflow-hidden"> */}
+            {/* {mockSongRequests.map((song, i) => (
               <div
                 key={song.id}
                 className={`flex items-start gap-4 px-5 py-4 transition-colors duration-200 hover:bg-background-50 ${
                   i < mockSongRequests.length - 1 ? 'border-b border-background-200/60' : ''
                 }`}
-              >
+              > */}
                 {/* Vinyl icon */}
-                <div className="w-10 h-10 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                {/* <div className="w-10 h-10 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <i className="ri-disc-fill text-accent-600" style={{ fontSize: '18px' }}></i>
-                </div>
+                </div> */}
 
-                <div className="flex-1 min-w-0">
+                {/* <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-body text-foreground-800 text-base font-medium truncate">
                       {song.songName}
@@ -166,20 +166,20 @@ export default function SongRequestSection() {
                       "{song.message}"
                     </p>
                   )}
-                </div>
+                </div> */}
 
                 {/* Message tooltip on desktop */}
-                {song.message && (
+                {/* {song.message && (
                   <div className="hidden sm:flex items-center flex-shrink-0" title={song.message}>
                     <i className="ri-chat-quote-line text-foreground-300" style={{ fontSize: '14px' }}></i>
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
+                )} */}
+              {/* </div>
+            ))} */}
+          {/* </div> */}
 
           {/* Add song button */}
-          <div className="text-center mt-6">
+          {/* <div className="text-center mt-6">
             <button
               onClick={scrollToForm}
               className="whitespace-nowrap inline-flex items-center gap-2 px-6 py-3 rounded-full bg-accent-500 hover:bg-accent-600 text-background-50 font-label text-sm font-medium tracking-wide transition-all duration-300 cursor-pointer"
@@ -187,7 +187,7 @@ export default function SongRequestSection() {
               <i className="ri-add-line" style={{ fontSize: '18px' }}></i>
               Pedir una canción
             </button>
-          </div>
+          </div> */}
         </div>
 
         {/* Song request form */}
@@ -211,118 +211,12 @@ export default function SongRequestSection() {
                     {submitted ? '¡Gracias por tu tema!' : 'Pedí tu canción'}
                   </h3>
                   <p className="font-label text-xs text-foreground-400">
-                    {submitted ? 'Tu pedido ya está en la lista' : 'Completá los datos y sumalo a la playlist'}
+                    {submitted ? 'Tu pedido ya está en la lista' : 'Sumate tu canción favorita a la playlist de la fiesta'}
                   </p>
                 </div>
               </div>
 
-              {submitted ? (
-                /* Success state */
-                <div className="text-center py-6">
-                  <div className="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mx-auto mb-4">
-                    <i className="ri-check-line text-primary-600" style={{ fontSize: '28px' }}></i>
-                  </div>
-                  <p className="font-body text-foreground-600 text-lg mb-4">
-                    Tu canción fue agregada a la lista. ¡Va a sonar en la fiesta!
-                  </p>
-                  <button
-                    onClick={() => setSubmitted(false)}
-                    className="whitespace-nowrap px-6 py-2.5 rounded-full border border-background-300 text-foreground-600 font-label text-xs font-medium tracking-wide hover:bg-background-200 transition-all duration-300 cursor-pointer"
-                  >
-                    Pedir otra canción
-                  </button>
-                </div>
-              ) : (
-                /* Form */
-                <form
-                  ref={formRef}
-                  data-readdy-form
-                  onSubmit={handleSubmit}
-                  className="flex flex-col gap-5"
-                >
-                  {/* Song name + Artist row */}
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <label htmlFor="songName" className="font-label text-xs tracking-widest uppercase text-secondary-500">
-                        Canción <span className="text-primary-600">*</span>
-                      </label>
-                      <input
-                        id="songName"
-                        name="songName"
-                        type="text"
-                        value={songName}
-                        onChange={(e) => setSongName(e.target.value)}
-                        placeholder="Ej: Perfect"
-                        className="w-full px-4 py-3 rounded-lg border border-background-300 bg-background-50 text-foreground-800 font-body text-sm placeholder:text-foreground-300 focus:outline-none focus:border-primary-400 transition-colors duration-200"
-                        maxLength={100}
-                      />
-                    </div>
-
-                    <div className="flex-1 flex flex-col gap-1.5">
-                      <label htmlFor="artist" className="font-label text-xs tracking-widest uppercase text-secondary-500">
-                        Artista <span className="text-primary-600">*</span>
-                      </label>
-                      <input
-                        id="artist"
-                        name="artist"
-                        type="text"
-                        value={artist}
-                        onChange={(e) => setArtist(e.target.value)}
-                        placeholder="Ej: Ed Sheeran"
-                        className="w-full px-4 py-3 rounded-lg border border-background-300 bg-background-50 text-foreground-800 font-body text-sm placeholder:text-foreground-300 focus:outline-none focus:border-primary-400 transition-colors duration-200"
-                        maxLength={100}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Guest name */}
-                  <div className="flex flex-col gap-1.5">
-                    <label htmlFor="guestName" className="font-label text-xs tracking-widest uppercase text-secondary-500">
-                      Tu nombre
-                    </label>
-                    <input
-                      id="guestName"
-                      name="guestName"
-                      type="text"
-                      value={guestName}
-                      onChange={(e) => setGuestName(e.target.value)}
-                      placeholder="Ej: Prima Luli"
-                      className="w-full px-4 py-3 rounded-lg border border-background-300 bg-background-50 text-foreground-800 font-body text-sm placeholder:text-foreground-300 focus:outline-none focus:border-primary-400 transition-colors duration-200"
-                      maxLength={60}
-                    />
-                  </div>
-
-                  {/* Message */}
-                  <div className="flex flex-col gap-1.5">
-                    <label htmlFor="message" className="font-label text-xs tracking-widest uppercase text-secondary-500">
-                      Dedicación o mensaje
-                    </label>
-                    <textarea
-                      id="message"
-                      name="message"
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Ej: ¡Esta la bailamos todas juntas!"
-                      rows={3}
-                      maxLength={500}
-                      className="w-full px-4 py-3 rounded-lg border border-background-300 bg-background-50 text-foreground-800 font-body text-sm placeholder:text-foreground-300 focus:outline-none focus:border-primary-400 transition-colors duration-200 resize-none"
-                    />
-                    <span className="text-foreground-300 font-label text-[10px] text-right">
-                      {message.length}/500
-                    </span>
-                  </div>
-
-                  {/* Error message */}
-                  {formError && (
-                    <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 font-body text-sm">
-                      <i className="ri-error-warning-line flex-shrink-0" style={{ fontSize: '16px' }}></i>
-                      {formError}
-                    </div>
-                  )}
-
-                  {/* Submit */}
-                  <button
-                    type="submit"
+              <button
                     disabled={submitting}
                     className="whitespace-nowrap w-full py-3.5 rounded-full bg-primary-500 hover:bg-primary-600 disabled:opacity-60 disabled:cursor-not-allowed text-background-50 font-label text-sm font-medium tracking-wider uppercase transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
                   >
@@ -338,8 +232,6 @@ export default function SongRequestSection() {
                       </>
                     )}
                   </button>
-                </form>
-              )}
             </div>
 
             {/* Decorative bottom */}
