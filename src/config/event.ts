@@ -88,8 +88,7 @@ export const eventConfig = {
   songRequests: {
     title: "¿Qué canción no puede faltar?",
     subtitle: "Dejame tu tema favorito y lo sumo a la playlist de la fiesta. ¡La música la elegimos entre todos!",
-    spotifyPlaylistUrl: "",
-    formUrl: "https://readdy.ai/api/form/d8m0dia1heuq7aefie90",
+    spotifyPlaylistUrl: "https://open.spotify.com/playlist/6mU9bF0o18UVsKUpqrQ7tK?si=6DMoQvBUS0aG_t7i03odYw&pt=d48a82b77638c156604fb7ebb8cf0590&pi=S2yeuAvWTyqU4",
   },
 
   // --- Panel admin ---
