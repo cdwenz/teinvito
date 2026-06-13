@@ -3,6 +3,13 @@
 // Modifica este archivo para reutilizar la plantilla en otros eventos
 // ============================================================
 import antoPhoto from "../assets/antogpt.png";
+import photo1 from "../assets/photo1.png";
+import photo2 from "../assets/photo2.png";
+import photo3 from "../assets/photo3.png";
+import photo4 from "../assets/photo4.png";
+import photo5 from "../assets/photo5.png";
+import photo6 from "../assets/photo6.png";
+
 export const eventConfig = {
   // --- Datos de la cumpleañera ---
   birthday: {
@@ -43,27 +50,27 @@ export const eventConfig = {
   // --- Galería de fotos ---
   gallery: [
     {
-      src: "https://readdy.ai/api/search-image?query=Elegant%20quincea%C3%B1era%20celebration%20venue%20with%20beautiful%20decorations%2C%20soft%20warm%20lighting%2C%20romantic%20atmosphere%2C%20flower%20arrangements%2C%20candlelit%20tables%2C%20pastel%20colors%2C%20luxurious%20event%20hall%2C%20professional%20photography&width=800&height=600&seq=gallery-1-v1&orientation=landscape",
-      alt: "Salón decorado",
+      src: photo1,
+      alt: "Recuerdos 1",
     },
     {
-      src: "https://readdy.ai/api/search-image?query=Beautiful%20fifteen%20year%20old%20girl%20posing%20elegantly%20in%20garden%2C%20wearing%20pastel%20dress%2C%20natural%20sunlight%2C%20soft%20dreamy%20portrait%20photography%2C%20flower%20garden%20background%2C%20romantic%20atmosphere%2C%20editorial%20style&width=800&height=600&seq=gallery-2-v1&orientation=landscape",
+      src: photo2,
       alt: "Sesión en jardín",
     },
     {
-      src: "https://readdy.ai/api/search-image?query=Close%20up%20of%20elegant%20quincea%C3%B1era%20dress%20details%2C%20delicate%20embroidery%20and%20lace%2C%20soft%20pastel%20pink%20fabric%2C%20luxurious%20textile%20texture%2C%20warm%20golden%20light%2C%20romantic%20fashion%20photography%2C%20shallow%20depth%20of%20field&width=800&height=600&seq=gallery-3-v1&orientation=landscape",
+      src: photo3,
       alt: "Detalles del vestido",
     },
     {
-      src: "https://readdy.ai/api/search-image?query=Beautiful%20birthday%20cake%20for%20fifteen%20year%20old%20celebration%2C%20three%20tier%20elegant%20cake%20with%20floral%20decorations%2C%20pastel%20colors%2C%20gold%20accents%2C%20soft%20lighting%2C%20professional%20food%20photography%2C%20neutral%20background&width=800&height=600&seq=gallery-4-v1&orientation=landscape",
+      src: photo4,
       alt: "Torta de 15",
     },
     {
-      src: "https://readdy.ai/api/search-image?query=Elegant%20table%20setting%20for%20quincea%C3%B1era%20party%2C%20gold%20silverware%2C%20crystal%20glasses%2C%20flower%20centerpiece%2C%20soft%20candlelight%2C%20luxurious%20table%20decoration%2C%20warm%20romantic%20atmosphere%2C%20professional%20event%20photography&width=800&height=600&seq=gallery-5-v1&orientation=landscape",
+      src: photo5,
       alt: "Mesa principal",
     },
     {
-      src: "https://readdy.ai/api/search-image?query=Dance%20floor%20at%20elegant%20quincea%C3%B1era%20celebration%2C%20colorful%20party%20lights%2C%20guests%20dancing%2C%20joyful%20atmosphere%2C%20warm%20evening%20event%2C%20professional%20event%20photography%2C%20lively%20celebration%20mood&width=800&height=600&seq=gallery-6-v1&orientation=landscape",
+      src: photo6,
       alt: "Pista de baile",
     },
   ],
@@ -88,7 +95,7 @@ export const eventConfig = {
   songRequests: {
     title: "¿Qué canción no puede faltar?",
     subtitle: "Dejame tu tema favorito y lo sumo a la playlist de la fiesta. ¡La música la elegimos entre todos!",
-    spotifyPlaylistUrl: "https://open.spotify.com/playlist/6mU9bF0o18UVsKUpqrQ7tK?si=6DMoQvBUS0aG_t7i03odYw&pt=d48a82b77638c156604fb7ebb8cf0590&pi=S2yeuAvWTyqU4",
+    spotifyPlaylistUrl: "https://open.spotify.com/playlist/1F6BVu13z86tk0yRxgdnyC?si=NFknhHyJRTqrBjiXK-pPFw&pi=fVm2QDjgQr67x",
   },
 
   // --- Panel admin ---
