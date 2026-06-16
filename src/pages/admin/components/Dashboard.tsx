@@ -69,7 +69,7 @@ export default function Dashboard() {
       'admin_authenticated',
     );
 
-    window.location.reload();
+    window.location.href = '/';
   };
 
   useEffect(() => {
