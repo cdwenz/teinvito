@@ -1,36 +1,65 @@
 import { useState } from 'react';
-import { eventConfig } from '@/config/event';
+import { login } from '@/lib/api';
 
 interface LoginFormProps {
   onLogin: () => void;
+  title?: string;
 }
 
-export default function LoginForm({ onLogin }: LoginFormProps) {
+export default function LoginForm({ onLogin, title }: LoginFormProps) {
   const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent,
+  ) => {
     e.preventDefault();
+
     setError('');
 
-    if (!password.trim()) {
-      setError('Ingresá la contraseña');
+    if (!email.trim()) {
+      setError(
+        'Ingresá el email',
+      );
       return;
     }
 
-    setLoading(true);
+    if (!password.trim()) {
+      setError(
+        'Ingresá la contraseña',
+      );
+      return;
+    }
 
-    // Simulate brief auth check
-    setTimeout(() => {
-      if (password === eventConfig.admin.password) {
-        sessionStorage.setItem('admin_authenticated', 'true');
-        onLogin();
-      } else {
-        setError('Contraseña incorrecta');
-      }
+    try {
+      setLoading(true);
+
+      const response =
+        await login(
+          email,
+          password,
+        );
+
+      sessionStorage.setItem(
+        'admin_authenticated',
+        'true',
+      );
+
+      sessionStorage.setItem(
+        'access_token',
+        response.accessToken,
+      );
+
+      onLogin();
+    } catch {
+      setError(
+        'Credenciales incorrectas',
+      );
+    } finally {
       setLoading(false);
-    }, 400);
+    }
   };
 
   return (
@@ -45,12 +74,32 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
             Panel de Organización
           </h1>
           <p className="font-body text-foreground-500 text-sm">
-            {eventConfig.birthday.firstName} · {eventConfig.birthday.welcomeMessage}
+            Administración del evento
           </p>
         </div>
 
         {/* Login card */}
         <form onSubmit={handleSubmit} className="bg-background-100 rounded-xl p-6 md:p-8">
+          <div className="mb-5">
+            <label
+              htmlFor="admin-email"
+              className="block font-label text-xs tracking-widest uppercase text-secondary-600 mb-2"
+            >
+              Email
+            </label>
+
+            <input
+              id="admin-email"
+              type="email"
+              value={email}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                setError('');
+              }}
+              placeholder="admin@teinvito.app"
+              className="w-full px-4 py-3 rounded-lg bg-background-50 border border-background-300 font-body text-foreground-800"
+            />
+          </div>
           <div className="mb-5">
             <label htmlFor="admin-password" className="block font-label text-xs tracking-widest uppercase text-secondary-600 mb-2">
               Contraseña
@@ -62,9 +111,8 @@ export default function LoginForm({ onLogin }: LoginFormProps) {
               onChange={(e) => { setPassword(e.target.value); setError(''); }}
               placeholder="Ingresá la contraseña"
               autoFocus
-              className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${
-                error ? 'border-red-300' : 'border-background-300'
-              }`}
+              className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${error ? 'border-red-300' : 'border-background-300'
+                }`}
             />
             {error && (
               <p className="mt-2 text-xs text-red-500 font-label flex items-center gap-1.5">

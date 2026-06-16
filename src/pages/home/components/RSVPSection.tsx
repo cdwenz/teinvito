@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { eventConfig } from '@/config/event';
+import type { Event } from '@/types/event';
+
+interface RSVPSectionProps {
+  event: Event;
+}
 
 interface FormData {
   name: string;
@@ -30,12 +33,9 @@ const initialFormData: FormData = {
   comments: '',
 };
 
-const FORM_SUBMIT_URL = 'https://readdy.ai/api/form/d8jg3k4cl43d0bibfaeg';
-const STORAGE_KEY = 'rsvp_submissions_maria15';
-
-export default function RSVPSection() {
-  const [searchParams] = useSearchParams();
-  const guestName = searchParams.get('guest');
+export default function RSVPSection({
+  event,
+}: RSVPSectionProps) {
 
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
@@ -44,7 +44,6 @@ export default function RSVPSection() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submitError, setSubmitError] = useState('');
-  const [duplicateError, setDuplicateError] = useState('');
   const [showSummary, setShowSummary] = useState(false);
 
   // Update summary visibility when key fields change
@@ -53,7 +52,7 @@ export default function RSVPSection() {
       formData.phone.trim() !== '' &&
       formData.email.trim() !== '' &&
       formData.attend !== '';
-    
+
     if (formData.attend === 'yes') {
       setShowSummary(hasBasicInfo && formData.attendType !== '');
     } else if (formData.attend === 'no') {
@@ -75,34 +74,7 @@ export default function RSVPSection() {
     return () => observer.disconnect();
   }, []);
 
-  const getStoredSubmissions = useCallback((): SubmissionRecord[] => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : [];
-    } catch {
-      return [];
-    }
-  }, []);
 
-  const checkDuplicate = useCallback((email: string, phone: string): boolean => {
-    const submissions = getStoredSubmissions();
-    const lowerEmail = email.toLowerCase().trim();
-    const cleanPhone = phone.replace(/\D/g, '');
-    
-    return submissions.some(
-      (s) => s.email.toLowerCase().trim() === lowerEmail || s.phone.replace(/\D/g, '') === cleanPhone
-    );
-  }, [getStoredSubmissions]);
-
-  const saveSubmission = useCallback((email: string, phone: string) => {
-    try {
-      const submissions = getStoredSubmissions();
-      submissions.push({ email, phone, timestamp: Date.now() });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(submissions));
-    } catch {
-      // Silent fail on storage
-    }
-  }, [getStoredSubmissions]);
 
   const updateField = (field: keyof FormData, value: string | number) => {
     const newData = { ...formData, [field]: value };
@@ -127,7 +99,6 @@ export default function RSVPSection() {
         return next;
       });
     }
-    setDuplicateError('');
     setSubmitError('');
   };
 
@@ -169,51 +140,77 @@ export default function RSVPSection() {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (
+    e: React.FormEvent,
+  ) => {
     e.preventDefault();
-    setSubmitError('');
-    setDuplicateError('');
 
-    if (!validate()) return;
-
-    // Check duplicates
-    if (checkDuplicate(formData.email, formData.phone)) {
-      setDuplicateError('Ya existe una confirmación registrada con estos datos.');
+    if (!validate()) {
       return;
     }
 
+    setSubmitError('');
     setIsSubmitting(true);
 
     try {
-      const body = new URLSearchParams();
-      body.append('name', formData.name.trim());
-      body.append('phone', formData.phone.trim());
-      body.append('email', formData.email.trim());
-      body.append('attend', formData.attend);
-      body.append('attend_type', formData.attend === 'yes' ? formData.attendType : '');
-      body.append('quantity', formData.attend === 'yes' && formData.attendType === 'familia' 
-        ? String(formData.quantity) 
-        : (formData.attend === 'yes' ? '1' : '0'));
-      body.append('family_name', formData.familyName.trim());
-      body.append('comments', formData.comments.trim().slice(0, 500));
-      if (guestName) {
-        body.append('guest_param', guestName);
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL}/rsvps`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type':
+              'application/json',
+          },
+          body: JSON.stringify({
+            eventId: event.id,
+
+            name: formData.name.trim(),
+            email: formData.email.trim(),
+            phone: formData.phone.trim(),
+
+            attend:
+              formData.attend === 'yes',
+
+            attendType:
+              formData.attend === 'yes'
+                ? formData.attendType ===
+                  'familia'
+                  ? 'FAMILY'
+                  : 'SOLO'
+                : undefined,
+
+            quantity:
+              formData.attend === 'yes'
+                ? formData.quantity
+                : 0,
+
+            familyName:
+              formData.familyName.trim(),
+
+            comments:
+              formData.comments.trim(),
+          }),
+        },
+      );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          Array.isArray(data.message)
+            ? data.message.join(', ')
+            : data.message ||
+            'Error al confirmar',
+        );
       }
 
-      const response = await fetch(FORM_SUBMIT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: body.toString(),
-      });
-
-      if (response.ok) {
-        saveSubmission(formData.email, formData.phone);
-        setSubmitted(true);
-      } else {
-        setSubmitError('Hubo un error al enviar. Intentá de nuevo.');
-      }
-    } catch {
-      setSubmitError('Error de conexión. Revisá tu internet e intentá de nuevo.');
+      setSubmitted(true);
+    } catch (error: any) {
+      setSubmitError(
+        error.message ||
+        'No se pudo enviar la confirmación',
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -268,16 +265,14 @@ export default function RSVPSection() {
         </div>
 
         <h2
-          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
           Confirmar asistencia
         </h2>
         <p
-          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-12 md:mb-16 transition-all duration-700 delay-100 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-12 md:mb-16 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
           Completá tus datos y contanos si nos acompañás
         </p>
@@ -288,9 +283,8 @@ export default function RSVPSection() {
           data-readdy-form
           onSubmit={handleSubmit}
           noValidate
-          className={`space-y-6 transition-all duration-700 delay-200 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
+          className={`space-y-6 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
         >
           {/* Name */}
           <div>
@@ -304,9 +298,8 @@ export default function RSVPSection() {
               value={formData.name}
               onChange={(e) => updateField('name', e.target.value)}
               placeholder="Ej: María García"
-              className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${
-                errors.name ? 'border-red-300' : 'border-background-300'
-              }`}
+              className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${errors.name ? 'border-red-300' : 'border-background-300'
+                }`}
             />
             {errors.name && (
               <p className="mt-1.5 text-xs text-red-500 font-label">{errors.name}</p>
@@ -326,9 +319,8 @@ export default function RSVPSection() {
                 value={formData.phone}
                 onChange={(e) => updateField('phone', e.target.value)}
                 placeholder="Ej: 261 555 1234"
-                className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${
-                  errors.phone ? 'border-red-300' : 'border-background-300'
-                }`}
+                className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${errors.phone ? 'border-red-300' : 'border-background-300'
+                  }`}
               />
               {errors.phone && (
                 <p className="mt-1.5 text-xs text-red-500 font-label">{errors.phone}</p>
@@ -345,9 +337,8 @@ export default function RSVPSection() {
                 value={formData.email}
                 onChange={(e) => updateField('email', e.target.value)}
                 placeholder="Ej: maria@gmail.com"
-                className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${
-                  errors.email ? 'border-red-300' : 'border-background-300'
-                }`}
+                className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${errors.email ? 'border-red-300' : 'border-background-300'
+                  }`}
               />
               {errors.email && (
                 <p className="mt-1.5 text-xs text-red-500 font-label">{errors.email}</p>
@@ -369,11 +360,10 @@ export default function RSVPSection() {
                   key={opt.value}
                   type="button"
                   onClick={() => updateField('attend', opt.value)}
-                  className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-lg border font-label text-sm tracking-wide transition-all duration-300 cursor-pointer ${
-                    formData.attend === opt.value
-                      ? 'border-primary-500 bg-primary-50 text-primary-700'
-                      : 'border-background-300 bg-background-50 text-foreground-600 hover:border-secondary-400'
-                  }`}
+                  className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-lg border font-label text-sm tracking-wide transition-all duration-300 cursor-pointer ${formData.attend === opt.value
+                    ? 'border-primary-500 bg-primary-50 text-primary-700'
+                    : 'border-background-300 bg-background-50 text-foreground-600 hover:border-secondary-400'
+                    }`}
                 >
                   <i className={opt.icon} style={{ fontSize: '16px' }}></i>
                   {opt.label}
@@ -401,11 +391,10 @@ export default function RSVPSection() {
                       key={opt.value}
                       type="button"
                       onClick={() => updateField('attendType', opt.value)}
-                      className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-lg border font-label text-sm tracking-wide transition-all duration-300 cursor-pointer ${
-                        formData.attendType === opt.value
-                          ? 'border-primary-500 bg-primary-50 text-primary-700'
-                          : 'border-background-300 bg-background-50 text-foreground-600 hover:border-secondary-400'
-                      }`}
+                      className={`flex-1 flex items-center justify-center gap-2 px-5 py-3 rounded-lg border font-label text-sm tracking-wide transition-all duration-300 cursor-pointer ${formData.attendType === opt.value
+                        ? 'border-primary-500 bg-primary-50 text-primary-700'
+                        : 'border-background-300 bg-background-50 text-foreground-600 hover:border-secondary-400'
+                        }`}
                     >
                       <i className={opt.icon} style={{ fontSize: '16px' }}></i>
                       {opt.label}
@@ -430,10 +419,9 @@ export default function RSVPSection() {
                       type="number"
                       min="2"
                       value={formData.quantity}
-                      onChange={(e) => updateField('quantity', Math.max(1, parseInt(e.target.value) || 1))}
-                      className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${
-                        errors.quantity ? 'border-red-300' : 'border-background-300'
-                      }`}
+                      onChange={(e) => updateField('quantity', Math.max(2, parseInt(e.target.value) || 1))}
+                      className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${errors.quantity ? 'border-red-300' : 'border-background-300'
+                        }`}
                     />
                     {errors.quantity && (
                       <p className="mt-1.5 text-xs text-red-500 font-label">{errors.quantity}</p>
@@ -489,16 +477,6 @@ export default function RSVPSection() {
                   {summaryText}
                 </p>
               </div>
-            </div>
-          )}
-
-          {/* Duplicate error */}
-          {duplicateError && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3">
-              <div className="w-8 h-8 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <i className="ri-error-warning-line text-red-600" style={{ fontSize: '16px' }}></i>
-              </div>
-              <p className="font-label text-sm text-red-700 leading-relaxed pt-0.5">{duplicateError}</p>
             </div>
           )}
 

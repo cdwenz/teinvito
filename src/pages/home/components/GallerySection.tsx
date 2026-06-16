@@ -1,15 +1,22 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
-import { eventConfig } from '@/config/event';
+import type { Event } from '@/types/event';
 
-const photos = eventConfig.gallery;
+interface GallerySectionProps {
+  event: Event;
+}
 
-export default function GallerySection() {
+export default function GallerySection({ event }: GallerySectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIndex, setLightboxIndex] = useState(0);
+  const photos = event.gallery ?? [];
+
+  if (!photos.length) {
+    return null;
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -87,25 +94,22 @@ export default function GallerySection() {
 
         {/* Title */}
         <h2
-          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
           Recuerdos que brillan
         </h2>
         <p
-          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-12 md:mb-16 transition-all duration-700 delay-100 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-12 md:mb-16 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
           Un adelanto de lo que será una noche mágica
         </p>
 
         {/* Carousel */}
         <div
-          className={`transition-all duration-700 delay-200 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
+          className={`transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
         >
           {/* Scrollable carousel container */}
           <div
@@ -118,7 +122,7 @@ export default function GallerySection() {
           >
             {photos.map((photo, i) => (
               <div
-                key={photo.src}
+                key={photo.id}
                 data-photo-card
                 className="flex-shrink-0 w-[280px] sm:w-[340px] md:w-[380px] snap-center"
               >
@@ -127,7 +131,7 @@ export default function GallerySection() {
                   className="group relative w-full aspect-[4/3] rounded-lg overflow-hidden border border-background-200/70 transition-all duration-300 hover:border-accent-300/60 cursor-pointer"
                 >
                   <img
-                    src={photo.src}
+                    src={photo.imageUrl}
                     alt={photo.alt}
                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                     loading={i <= 1 ? 'eager' : 'lazy'}
@@ -152,11 +156,10 @@ export default function GallerySection() {
               <button
                 key={i}
                 onClick={() => scrollToPhoto(i)}
-                className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                  i === currentIndex
+                className={`w-2 h-2 rounded-full transition-all duration-300 cursor-pointer ${i === currentIndex
                     ? 'bg-primary-500 w-6'
                     : 'bg-secondary-300 hover:bg-secondary-400'
-                }`}
+                  }`}
                 aria-label={`Ir a foto ${i + 1}`}
               />
             ))}
@@ -221,7 +224,7 @@ export default function GallerySection() {
             onClick={(e) => e.stopPropagation()}
           >
             <img
-              src={photos[lightboxIndex].src}
+              src={photos[lightboxIndex].imageUrl}
               alt={photos[lightboxIndex].alt}
               className="max-w-full max-h-[85vh] object-contain rounded-lg"
             />
@@ -247,11 +250,10 @@ export default function GallerySection() {
                   e.stopPropagation();
                   setLightboxIndex(i);
                 }}
-                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
-                  i === lightboxIndex
+                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 cursor-pointer ${i === lightboxIndex
                     ? 'bg-background-50 w-5'
                     : 'bg-background-50/30 hover:bg-background-50/60'
-                }`}
+                  }`}
                 aria-label={`Ver foto ${i + 1}`}
               />
             ))}

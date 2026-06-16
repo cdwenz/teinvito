@@ -3,12 +3,19 @@ import LoginForm from './components/LoginForm';
 import Dashboard from './components/Dashboard';
 
 export default function Admin() {
+
   const [authenticated, setAuthenticated] = useState(false);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = sessionStorage.getItem('admin_authenticated');
-    setAuthenticated(auth === 'true');
+    const token =
+      sessionStorage.getItem(
+        'access_token',
+      );
+
+    setAuthenticated(
+      !!token,
+    );
     setLoading(false);
   }, []);
 

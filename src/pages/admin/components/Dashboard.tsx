@@ -1,35 +1,161 @@
-import { useState, useMemo } from 'react';
-import { mockSubmissions, getMockStats } from '@/mocks/admin';
-import type { FilterState } from '../types';
+import {
+  useEffect,
+  useMemo,
+  useState,
+} from 'react';
+
+import {
+  useSearchParams,
+} from 'react-router-dom';
+
+import {
+  getEvent,
+  getRsvps,
+  getRsvpStats,
+} from '@/lib/api';
+
+import type {
+  Event as EventType,
+} from '@/types/event';
+
+import type {
+  Rsvp,
+  RsvpStats,
+} from '@/types/dashboard';
+
+import type {
+  FilterState,
+} from '../types';
 
 export default function Dashboard() {
-  const [filter, setFilter] = useState<FilterState>({ search: '', filter: 'all' });
 
-  const stats = useMemo(() => getMockStats(), []);
+  const [searchParams] =
+    useSearchParams();
+
+  const slug =
+    searchParams.get('slug') ||
+    'antonella-16';
+
+
+  const [event, setEvent] =
+    useState<EventType | null>(null);
+
+  const [submissions, setSubmissions] =
+    useState<Rsvp[]>([]);
+
+  const [stats, setStats] =
+    useState<RsvpStats>({
+      total: 0,
+      confirmed: 0,
+      rejected: 0,
+      totalAttendees: 0,
+    });
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [filter, setFilter] =
+    useState<FilterState>({
+      search: '',
+      filter: 'all',
+    });
+
+  const logout = () => {
+    sessionStorage.removeItem(
+      'access_token',
+    );
+
+    sessionStorage.removeItem(
+      'admin_authenticated',
+    );
+
+    window.location.reload();
+  };
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const eventData: EventType =
+          await getEvent(slug);
+
+        setEvent(eventData);
+
+        const [
+          rsvpsData,
+          statsData,
+        ] = await Promise.all([
+          getRsvps(eventData.id),
+          getRsvpStats(eventData.id),
+        ]);
+
+        setSubmissions(
+          rsvpsData,
+        );
+
+        setStats(
+          statsData,
+        );
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    load();
+  }, [slug]);
+
 
   const filteredSubmissions = useMemo(() => {
-    return mockSubmissions.filter((s) => {
-      // Text search
-      const query = filter.search.toLowerCase().trim();
+    return submissions.filter((s) => {
+      const query =
+        filter.search
+          .toLowerCase()
+          .trim();
+
       if (query) {
-        const matchesName = s.name.toLowerCase().includes(query);
-        const matchesPhone = s.phone.includes(query);
-        const matchesEmail = s.email.toLowerCase().includes(query);
-        if (!matchesName && !matchesPhone && !matchesEmail) return false;
+        const matchesName =
+          s.name
+            .toLowerCase()
+            .includes(query);
+
+        const matchesPhone =
+          s.phone.includes(query);
+
+        const matchesEmail =
+          s.email
+            .toLowerCase()
+            .includes(query);
+
+        if (
+          !matchesName &&
+          !matchesPhone &&
+          !matchesEmail
+        ) {
+          return false;
+        }
       }
 
-      // Type filter
-      if (filter.filter === 'confirmed' && s.attend !== 'yes') return false;
-      if (filter.filter === 'rejected' && s.attend !== 'no') return false;
+      if (
+        filter.filter ===
+        'confirmed' &&
+        !s.attend
+      ) {
+        return false;
+      }
+
+      if (
+        filter.filter ===
+        'rejected' &&
+        s.attend
+      ) {
+        return false;
+      }
 
       return true;
     });
-  }, [filter]);
+  }, [submissions, filter]);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem('admin_authenticated');
-    window.location.reload();
-  };
 
   const formatDate = (iso: string) => {
     return new Date(iso).toLocaleDateString('es-AR', {
@@ -40,6 +166,22 @@ export default function Dashboard() {
       minute: '2-digit',
     });
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Cargando...
+      </div>
+    );
+  }
+
+  if (!event) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Evento no encontrado
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background-50">
@@ -52,7 +194,7 @@ export default function Dashboard() {
             </div>
             <div>
               <h1 className="font-label text-sm font-semibold text-foreground-900">Panel de Organización</h1>
-              <p className="font-label text-xs text-secondary-500">Mis 15 Años</p>
+              <p className="font-label text-xs text-secondary-500">{event.title}</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -66,11 +208,11 @@ export default function Dashboard() {
               Ver invitación
             </a>
             <button
-              onClick={handleLogout}
+              onClick={logout}
               className="flex items-center gap-1.5 font-label text-xs text-secondary-500 hover:text-red-600 transition-colors duration-200 cursor-pointer"
             >
               <i className="ri-logout-box-line" style={{ fontSize: '14px' }}></i>
-              Salir
+              Cerrar sesión
             </button>
           </div>
         </div>
@@ -150,11 +292,10 @@ export default function Dashboard() {
                   <button
                     key={opt.value}
                     onClick={() => setFilter((f) => ({ ...f, filter: opt.value }))}
-                    className={`px-3 py-1.5 rounded-full font-label text-xs font-medium tracking-wide transition-all duration-200 cursor-pointer whitespace-nowrap ${
-                      filter.filter === opt.value
-                        ? 'bg-primary-500 text-background-50'
-                        : 'text-secondary-600 hover:text-foreground-700'
-                    }`}
+                    className={`px-3 py-1.5 rounded-full font-label text-xs font-medium tracking-wide transition-all duration-200 cursor-pointer whitespace-nowrap ${filter.filter === opt.value
+                      ? 'bg-primary-500 text-background-50'
+                      : 'text-secondary-600 hover:text-foreground-700'
+                      }`}
                   >
                     {opt.label}
                   </button>
@@ -210,21 +351,29 @@ export default function Dashboard() {
                         </div>
                       </td>
                       <td className="px-4 md:px-5 py-3 hidden md:table-cell">
-                        <span className="font-body text-sm text-foreground-600">{s.phone}</span>
+                        <span className="font-body text-sm text-foreground-600">
+                          <a
+                            href={`https://wa.me/${s.phone.replace(/\D/g, '')}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-primary-600 hover:underline"
+                          >
+                            {s.phone}
+                          </a>
+                        </span>
                       </td>
                       <td className="px-4 md:px-5 py-3 hidden lg:table-cell">
                         <span className="font-body text-sm text-foreground-600">{s.email}</span>
                       </td>
                       <td className="px-4 md:px-5 py-3 text-center">
                         <span
-                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-label text-xs font-medium ${
-                            s.attend === 'yes'
-                              ? 'bg-primary-100 text-primary-700'
-                              : 'bg-red-100 text-red-600'
-                          }`}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-label text-xs font-medium ${s.attend
+                            ? 'bg-primary-100 text-primary-700'
+                            : 'bg-red-100 text-red-600'
+                            }`}
                         >
-                          <i className={s.attend === 'yes' ? 'ri-check-line' : 'ri-close-line'} style={{ fontSize: '12px' }}></i>
-                          {s.attend === 'yes' ? 'Sí' : 'No'}
+                          <i className={s.attend ? 'ri-check-line' : 'ri-close-line'} style={{ fontSize: '12px' }}></i>
+                          {s.attend ? 'Sí' : 'No'}
                         </span>
                       </td>
                       <td className="px-4 md:px-5 py-3 text-center">
@@ -243,7 +392,7 @@ export default function Dashboard() {
           {/* Results count */}
           <div className="px-4 md:px-5 py-3 border-t border-background-300/50">
             <p className="font-label text-xs text-secondary-500">
-              Mostrando {filteredSubmissions.length} de {mockSubmissions.length} resultados
+              Mostrando {filteredSubmissions.length} de {submissions.length}
             </p>
           </div>
         </div>

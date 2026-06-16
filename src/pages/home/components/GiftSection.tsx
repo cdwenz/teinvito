@@ -1,7 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { eventConfig } from '@/config/event';
+import type { Event } from '@/types/event';
 
-export default function GiftSection() {
+interface GiftSectionProps {
+  event: Event;
+}
+
+export default function GiftSection({
+  event,
+}: GiftSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -17,6 +23,11 @@ export default function GiftSection() {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
+  const giftInfo = event.giftInfo;
+
+  if (!giftInfo) {
+    return null;
+  }
 
   const copyToClipboard = async (text: string, field: string) => {
     try {
@@ -41,19 +52,19 @@ export default function GiftSection() {
   const giftData = [
     {
       label: 'Alias',
-      value: eventConfig.gift.alias,
+      value: giftInfo.alias,
       icon: 'ri-bank-line',
       field: 'alias',
     },
     {
       label: 'CBU',
-      value: eventConfig.gift.cbu,
+      value: giftInfo.cbu,
       icon: 'ri-file-copy-line',
       field: 'cbu',
     },
     {
       label: 'Titular',
-      value: eventConfig.gift.titular,
+      value: giftInfo.holder,
       icon: 'ri-user-line',
       field: 'titular',
     },
@@ -75,27 +86,24 @@ export default function GiftSection() {
 
         {/* Title */}
         <h2
-          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
           Tu presencia es el mejor regalo
         </h2>
 
         {/* Thank you message */}
         <p
-          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-12 md:mb-16 leading-relaxed transition-all duration-700 delay-100 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-12 md:mb-16 leading-relaxed transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
-          {eventConfig.gift.thankYouMessage}
+          {giftInfo.thankYouMessage}
         </p>
 
         {/* Gift card */}
         <div
-          className={`bg-background-50 rounded-xl border border-background-200/70 overflow-hidden transition-all duration-700 delay-200 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
+          className={`bg-background-50 rounded-xl border border-background-200/70 overflow-hidden transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
         >
           {/* Decorative top bar */}
           <div className="h-1.5 bg-accent-400/60" />
@@ -104,9 +112,8 @@ export default function GiftSection() {
             {giftData.map((item, i) => (
               <div
                 key={item.field}
-                className={`flex items-center justify-between py-4 ${
-                  i < giftData.length - 1 ? 'border-b border-background-200/60' : ''
-                }`}
+                className={`flex items-center justify-between py-4 ${i < giftData.length - 1 ? 'border-b border-background-200/60' : ''
+                  }`}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-9 h-9 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0">

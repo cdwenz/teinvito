@@ -1,7 +1,18 @@
 import { useEffect, useRef, useState } from 'react';
-import { eventConfig } from '@/config/event';
+import type { Event } from '@/types/event';
 
-export default function LocationSection() {
+interface LocationSectionProps {
+  event: Event;
+}
+
+export default function LocationSection({
+  event,
+}: LocationSectionProps) {
+  const venue = event.venue;
+
+  if (!venue) {
+    return null;
+  }
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -33,30 +44,27 @@ export default function LocationSection() {
 
         {/* Title */}
         <h2
-          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
           La ubicación
         </h2>
         <p
-          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-12 md:mb-16 transition-all duration-700 delay-100 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-12 md:mb-16 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
-          {eventConfig.venue.name} · {eventConfig.venue.address}
+          {venue.name} · {venue.address}
         </p>
 
         {/* Map container */}
         <div
-          className={`rounded-xl overflow-hidden border border-background-200/70 transition-all duration-700 delay-200 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}
+          className={`rounded-xl overflow-hidden border border-background-200/70 transition-all duration-700 delay-200 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+            }`}
         >
           <div className="relative w-full aspect-[16/9] md:aspect-[21/9]">
             <iframe
-              src={eventConfig.venue.mapsEmbedUrl}
-              title={`Mapa de ${eventConfig.venue.name}`}
+              src={venue.mapsEmbedUrl ?? ''}
+              title={`Mapa de ${venue.name}`}
               className="absolute inset-0 w-full h-full border-0"
               allowFullScreen
               loading="lazy"
@@ -67,12 +75,11 @@ export default function LocationSection() {
 
         {/* CTA buttons */}
         <div
-          className={`flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 transition-all duration-700 delay-300 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`flex flex-col sm:flex-row items-center justify-center gap-4 mt-8 transition-all duration-700 delay-300 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
           <a
-            href={eventConfig.venue.mapsDirectionUrl}
+            href={venue.mapsDirectionUrl ?? '#'}
             target="_blank"
             rel="noopener noreferrer"
             className="group inline-flex items-center gap-3 bg-primary-500 hover:bg-primary-600 text-background-50 px-7 py-3.5 rounded-full font-label text-sm font-medium tracking-wide uppercase transition-all duration-300 cursor-pointer"
@@ -82,19 +89,21 @@ export default function LocationSection() {
             </span>
             Cómo llegar
           </a>
-          <a
-            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(eventConfig.venue.address)}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-3 bg-background-100 hover:bg-background-200 text-foreground-700 px-7 py-3.5 rounded-full font-label text-sm font-medium tracking-wide transition-all duration-300 cursor-pointer border border-background-200/70"
+          {venue.mapsDirectionUrl && (
+            <a
+              href={venue.mapsDirectionUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group inline-flex items-center gap-3 bg-background-100 hover:bg-background-200 text-foreground-700 px-7 py-3.5 rounded-full font-label text-sm font-medium tracking-wide transition-all duration-300 cursor-pointer border border-background-200/70"
           >
-            <span className="w-9 h-9 rounded-full bg-background-200/70 flex items-center justify-center">
-              <i className="ri-map-pin-2-line" style={{ fontSize: '18px' }}></i>
-            </span>
-            Abrir en Google Maps
-          </a>
+              <span className="w-9 h-9 rounded-full bg-background-200/70 flex items-center justify-center">
+                <i className="ri-map-pin-2-line" style={{ fontSize: '18px' }}></i>
+              </span>
+              Abrir en Google Maps
+            </a>
+          )}
         </div>
       </div>
-    </section>
+    </section >
   );
 }

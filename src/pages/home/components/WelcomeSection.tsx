@@ -1,12 +1,15 @@
 import { useEffect, useRef, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
-import { eventConfig } from '@/config/event';
+import type { Event } from '@/types/event';
 
 interface WelcomeSectionProps {
   guestName: string | null;
+  event: Event;
 }
 
-export default function WelcomeSection({ guestName }: WelcomeSectionProps) {
+export default function WelcomeSection({
+  guestName,
+  event,
+}: WelcomeSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -48,7 +51,7 @@ export default function WelcomeSection({ guestName }: WelcomeSectionProps) {
           }`}
         >
           <p className="font-heading text-2xl md:text-3xl lg:text-4xl text-foreground-800 font-light italic leading-relaxed">
-            &ldquo;{eventConfig.birthday.welcomePhrase}&rdquo;
+            &ldquo;{event.welcomePhrase}&rdquo;
           </p>
         </div>
 

@@ -1,7 +1,8 @@
 import { useSearchParams } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { eventConfig } from '@/config/event';
+import { getEvent } from '@/lib/api';
+import type { Event } from '@/types/event';
 import HeroSection from './components/HeroSection';
 import WelcomeSection from './components/WelcomeSection';
 import EventInfoSection from './components/EventInfoSection';
@@ -15,23 +16,55 @@ import SongRequestSection from './components/SongRequestSection';
 
 export default function Home() {
   const [searchParams] = useSearchParams();
+
   const guestName = searchParams.get('guest');
+  const slug =
+    searchParams.get('slug') ||
+    'antonella-16';
+
+  console.log('Guest name from URL:', guestName);
+  console.log('Slug from URL:', slug);
+  const [event, setEvent] =
+    useState<Event | null>(null);
 
   useEffect(() => {
-    document.title = eventConfig.seo.title;
-  }, []);
+    async function load() {
+      try {
+        const data =
+          await getEvent(slug);
+
+        setEvent(data);
+
+        document.title =
+          data.seo?.title ||
+          data.title;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    load();
+  }, [slug]);
+
+  if (!event) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Cargando evento...
+      </div>
+    );
+  }
 
   return (
     <main className="min-h-screen bg-background-50">
-      <HeroSection />
-      <WelcomeSection guestName={guestName} />
-      <EventInfoSection />
-      <LocationSection />
+      <HeroSection event={event} />
+      <WelcomeSection guestName={guestName} event={event} />
+      <EventInfoSection event={event} />
       {/* <TimelineSection /> */}
-      <GallerySection />
-      <SongRequestSection/>
-      <GiftSection />
-      <RSVPSection />
+      <LocationSection event={event} />
+      <GallerySection event={event} />
+      <SongRequestSection event={event} />
+      <GiftSection event={event} />
+      <RSVPSection event={event} />
       <WhatsAppButton />
 
       {/* Footer with admin link */}

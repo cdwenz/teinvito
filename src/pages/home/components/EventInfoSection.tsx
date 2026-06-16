@@ -1,37 +1,61 @@
 import { useEffect, useRef, useState } from 'react';
-import { eventConfig } from '@/config/event';
+import type { Event } from '@/types/event';
 
-const infoItems = [
-  {
-    icon: 'ri-calendar-line',
-    label: 'Fecha',
-    value: eventConfig.displayDate,
-  },
-  {
-    icon: 'ri-time-line',
-    label: 'Hora',
-    value: eventConfig.displayTime,
-  },
-  {
-    icon: 'ri-building-line',
-    label: 'Lugar',
-    value: eventConfig.venue.name,
-  },
-  {
-    icon: 'ri-map-pin-line',
-    label: 'Dirección',
-    value: eventConfig.venue.address,
-  },
-  {
-    icon: 'ri-t-shirt-line',
-    label: 'Vestimenta',
-    value: eventConfig.dressCode,
-  },
-];
 
-export default function EventInfoSection() {
+
+interface EventInfoSectionProps {
+  event: Event;
+}
+
+export default function EventInfoSection({ event, }: EventInfoSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+
+  const infoItems = [
+    {
+      icon: 'ri-calendar-line',
+      label: 'Fecha',
+      value: new Date(
+        event.eventDate,
+      ).toLocaleDateString('es-AR', {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+      }),
+    },
+    {
+      icon: 'ri-time-line',
+      label: 'Hora',
+      value: new Date(
+        event.eventDate,
+      ).toLocaleTimeString('es-AR', {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
+    },
+    {
+      icon: 'ri-building-line',
+      label: 'Lugar',
+      value:
+        event.venue?.name ??
+        'Por definir',
+    },
+    {
+      icon: 'ri-map-pin-line',
+      label: 'Dirección',
+      value:
+        event.venue?.address ??
+        'Por definir',
+    },
+  ];
+
+  if (event.dressCode) {
+    infoItems.push({
+      icon: 'ri-t-shirt-line',
+      label: 'Vestimenta',
+      value: event.dressCode,
+    });
+  }
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -64,16 +88,14 @@ export default function EventInfoSection() {
 
         {/* Title */}
         <h2
-          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
           El gran día
         </h2>
         <p
-          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-14 md:mb-20 transition-all duration-700 delay-100 ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
-          }`}
+          className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-14 md:mb-20 transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
+            }`}
         >
           Cada detalle pensado para una noche inolvidable
         </p>
@@ -83,9 +105,8 @@ export default function EventInfoSection() {
           {infoItems.map((item, i) => (
             <div
               key={item.label}
-              className={`group bg-background-100 rounded-lg p-6 md:p-7 transition-all duration-500 hover:bg-background-200/70 ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-              }`}
+              className={`group bg-background-100 rounded-lg p-6 md:p-7 transition-all duration-500 hover:bg-background-200/70 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+                }`}
               style={{ transitionDelay: `${200 + i * 80}ms` }}
             >
               <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-primary-100 flex items-center justify-center mb-4 group-hover:bg-primary-200 transition-colors duration-300">
@@ -101,26 +122,31 @@ export default function EventInfoSection() {
           ))}
 
           {/* Additional info card (full width on mobile) */}
-          <div
-            className={`sm:col-span-2 lg:col-span-3 bg-background-100 rounded-lg p-6 md:p-7 transition-all duration-500 ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}
-            style={{ transitionDelay: `${200 + infoItems.length * 80}ms` }}
-          >
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                <i className="ri-information-line text-accent-700" style={{ fontSize: '18px' }}></i>
+          {event.additionalInfo && (
+            <div
+              className={`sm:col-span-2 lg:col-span-3 bg-background-100 rounded-lg p-6 md:p-7 transition-all duration-500 ${isVisible
+                ? 'opacity-100 translate-y-0'
+                : 'opacity-0 translate-y-8'
+                }`}
+              style={{
+                transitionDelay: `${200 + infoItems.length * 80
+                  }ms`,
+              }}
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 md:w-11 md:h-11 rounded-full bg-accent-100 flex items-center justify-center flex-shrink-0 mt-0.5">
+                  <i className="ri-information-line text-accent-700" style={{ fontSize: '18px' }}></i>
+                </div>
+                <div>
+                  <h3 className="font-label text-xs tracking-widest uppercase text-secondary-500 mb-2">
+                    Información adicional
+                  </h3>
+                  <p className="font-body text-foreground-700 text-base md:text-lg leading-relaxed">
+                    {event.additionalInfo}
+                  </p>
+                </div>
               </div>
-              <div>
-                <h3 className="font-label text-xs tracking-widest uppercase text-secondary-500 mb-2">
-                  Información adicional
-                </h3>
-                <p className="font-body text-foreground-700 text-base md:text-lg leading-relaxed">
-                  {eventConfig.additionalInfo}
-                </p>
-              </div>
-            </div>
-          </div>
+            </div>)}
         </div>
       </div>
     </section>

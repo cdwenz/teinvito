@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
-import { eventConfig } from '@/config/event';
-import { mockSongRequests } from '@/mocks/songRequests';
+import type { Event } from '@/types/event';
 
-export default function SongRequestSection() {
+interface SongRequestSectionProps {
+  event: Event;
+}
+
+export default function SongRequestSection({
+  event,
+}: SongRequestSectionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -19,6 +24,12 @@ export default function SongRequestSection() {
     return () => observer.disconnect();
   }, []);
 
+  const musicSection =
+    event.musicSection;
+
+  if (!musicSection) {
+    return null;
+  }
 
   return (
     <section
@@ -46,7 +57,7 @@ export default function SongRequestSection() {
           className={`font-heading text-3xl md:text-5xl text-center text-foreground-900 font-light mb-3 transition-all duration-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             }`}
         >
-          {eventConfig.songRequests.title}
+          {musicSection.title}
         </h2>
 
         {/* Subtitle */}
@@ -54,7 +65,7 @@ export default function SongRequestSection() {
           className={`text-center text-foreground-500 font-body text-lg md:text-xl mb-10 md:mb-14 leading-relaxed transition-all duration-700 delay-100 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
             }`}
         >
-          {eventConfig.songRequests.subtitle}
+          {musicSection.subtitle}
         </p>
 
         {/* Song list — already requested songs */}
@@ -159,7 +170,7 @@ export default function SongRequestSection() {
               </div>
 
               <a
-                href={eventConfig.songRequests.spotifyPlaylistUrl}
+                href={musicSection.spotifyPlaylistUrl}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="whitespace-nowrap w-full py-3.5 rounded-full bg-primary-500 hover:bg-primary-600 text-background-50 font-label text-sm font-medium tracking-wider uppercase transition-all duration-300 cursor-pointer flex items-center justify-center gap-2"
