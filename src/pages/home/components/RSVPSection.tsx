@@ -318,7 +318,7 @@ export default function RSVPSection({
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => updateField('phone', e.target.value)}
-                placeholder="Ej: 261 555 1234"
+                placeholder="Ej: 54 299 1234567"
                 className={`w-full px-4 py-3 rounded-lg bg-background-50 border font-body text-foreground-800 placeholder:text-secondary-400 focus:outline-none focus:ring-2 focus:ring-primary-300 transition-all duration-300 text-base ${errors.phone ? 'border-red-300' : 'border-background-300'
                   }`}
               />
