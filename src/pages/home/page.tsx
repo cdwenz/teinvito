@@ -68,10 +68,10 @@ export default function Home() {
       <WhatsAppButton />
 
       {/* Footer with admin link */}
-      <footer className="py-6 px-4 text-center bg-background-50 border-t border-background-300/50">
+      <footer className=" text-center bg-background-50 border-t border-background-300/50">
         <Link
           to="/admin"
-          className="inline-flex items-center gap-1.5 font-label text-xs text-secondary-400 hover:text-secondary-600 transition-colors duration-300"
+          className="inline-flex items-center gap-1.5 font-label text-xs text-secondary-400 hover:text-secondary-600 transition-colors duration-300 py-10 px-6"
         >
           <i className="ri-shield-keyhole-line" style={{ fontSize: '14px' }}></i>
           Panel de organización
