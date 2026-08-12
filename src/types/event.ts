@@ -18,6 +18,9 @@ export interface Event {
 
   eventDate: string;
 
+  rsvpWhatsappNumber?: string | null;
+  rsvpWhatsappMessage?: string | null;
+
   isPublished: boolean;
 
   createdAt: string;

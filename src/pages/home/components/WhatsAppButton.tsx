@@ -1,10 +1,19 @@
 import { useState } from 'react';
-import { eventConfig } from '@/config/event';
+import type { Event } from '@/types/event';
 
-export default function WhatsAppButton() {
+interface WhatsAppButtonProps {
+  event: Event;
+}
+
+export default function WhatsAppButton({ event }: WhatsAppButtonProps) {
   const [showTooltip, setShowTooltip] = useState(false);
 
-  const whatsappUrl = `https://wa.me/${eventConfig.whatsapp.number}?text=${encodeURIComponent(eventConfig.whatsapp.message)}`;
+  if (!event.rsvpWhatsappNumber) {
+    return null;
+  }
+
+  const message = event.rsvpWhatsappMessage || '¡Hola! Quería confirmar mi asistencia';
+  const whatsappUrl = `https://wa.me/${event.rsvpWhatsappNumber}?text=${encodeURIComponent(message)}`;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2">

@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
-import { eventConfig } from '@/config/event';
+import type { Event } from '@/types/event';
 
-const timelineItems = eventConfig.timeline;
+interface TimelineSectionProps {
+  event: Event;
+}
 
-export default function TimelineSection() {
+export default function TimelineSection({ event }: TimelineSectionProps) {
+  const timelineItems = event.timeline;
   const sectionRef = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
@@ -18,6 +21,10 @@ export default function TimelineSection() {
     if (sectionRef.current) observer.observe(sectionRef.current);
     return () => observer.disconnect();
   }, []);
+
+  if (timelineItems.length === 0) {
+    return null;
+  }
 
   return (
     <section
@@ -59,7 +66,7 @@ export default function TimelineSection() {
 
             return (
               <div
-                key={item.time}
+                key={item.id}
                 className={`relative flex items-start gap-6 md:gap-0 mb-10 last:mb-0 ${
                   isLeft ? 'md:flex-row' : 'md:flex-row-reverse'
                 }`}

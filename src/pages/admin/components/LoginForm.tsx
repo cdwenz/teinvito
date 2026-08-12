@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { login } from '@/lib/api';
 
 interface LoginFormProps {
@@ -150,6 +151,15 @@ export default function LoginForm({ onLogin, title }: LoginFormProps) {
             <i className="ri-arrow-left-line" style={{ fontSize: '14px' }}></i>
             Volver a la invitación
           </a>
+        </div>
+
+        <div className="text-center mt-3">
+          <Link
+            to="/registro"
+            className="inline-flex items-center gap-1.5 font-label text-xs text-secondary-500 hover:text-foreground-700 transition-colors duration-300"
+          >
+            ¿No tenés cuenta? Registrate
+          </Link>
         </div>
       </div>
     </div>

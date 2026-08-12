@@ -1,18 +1,17 @@
 import {
+  useCallback,
   useEffect,
   useMemo,
   useState,
 } from 'react';
 
 import {
-  useSearchParams,
-} from 'react-router-dom';
-
-import {
   getEvent,
   getRsvps,
   getRsvpStats,
 } from '@/lib/api';
+
+import { getInvitationUrl } from '@/lib/subdomain';
 
 import type {
   Event as EventType,
@@ -27,15 +26,15 @@ import type {
   FilterState,
 } from '../types';
 
-export default function Dashboard() {
+const RSVP_POLL_INTERVAL_MS = 20_000;
 
-  const [searchParams] =
-    useSearchParams();
+interface DashboardProps {
+  slug: string;
+  onSwitchEvent?: () => void;
+  onEdit?: (event: EventType) => void;
+}
 
-  const slug =
-    searchParams.get('slug') ||
-    'antonella-16';
-
+export default function Dashboard({ slug, onSwitchEvent, onEdit }: DashboardProps) {
 
   const [event, setEvent] =
     useState<EventType | null>(null);
@@ -72,29 +71,31 @@ export default function Dashboard() {
     window.location.href = '/';
   };
 
+  const refreshRsvps = useCallback(async (eventId: string) => {
+    try {
+      const [rsvpsData, statsData] = await Promise.all([
+        getRsvps(eventId),
+        getRsvpStats(eventId),
+      ]);
+
+      setSubmissions(rsvpsData);
+      setStats(statsData);
+    } catch (error) {
+      console.error(error);
+    }
+  }, []);
+
   useEffect(() => {
+    let eventId: string | null = null;
+
     async function load() {
       try {
-        const eventData: EventType =
-          await getEvent(slug);
+        const eventData: EventType = await getEvent(slug);
 
         setEvent(eventData);
+        eventId = eventData.id;
 
-        const [
-          rsvpsData,
-          statsData,
-        ] = await Promise.all([
-          getRsvps(eventData.id),
-          getRsvpStats(eventData.id),
-        ]);
-
-        setSubmissions(
-          rsvpsData,
-        );
-
-        setStats(
-          statsData,
-        );
+        await refreshRsvps(eventData.id);
       } catch (error) {
         console.error(error);
       } finally {
@@ -103,7 +104,13 @@ export default function Dashboard() {
     }
 
     load();
-  }, [slug]);
+
+    const interval = setInterval(() => {
+      if (eventId) refreshRsvps(eventId);
+    }, RSVP_POLL_INTERVAL_MS);
+
+    return () => clearInterval(interval);
+  }, [slug, refreshRsvps]);
 
 
   const filteredSubmissions = useMemo(() => {
@@ -198,8 +205,17 @@ export default function Dashboard() {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            {onSwitchEvent && (
+              <button
+                onClick={onSwitchEvent}
+                className="hidden sm:inline-flex items-center gap-1.5 font-label text-xs text-secondary-600 hover:text-foreground-700 transition-colors duration-200 cursor-pointer"
+              >
+                <i className="ri-arrow-left-right-line" style={{ fontSize: '14px' }}></i>
+                Cambiar evento
+              </button>
+            )}
             <a
-              href="/"
+              href={getInvitationUrl(slug)}
               target="_blank"
               rel="noopener noreferrer"
               className="hidden sm:inline-flex items-center gap-1.5 font-label text-xs text-secondary-600 hover:text-foreground-700 transition-colors duration-200"
@@ -207,6 +223,15 @@ export default function Dashboard() {
               <i className="ri-external-link-line" style={{ fontSize: '14px' }}></i>
               Ver invitación
             </a>
+            {onEdit && (
+              <button
+                onClick={() => onEdit(event)}
+                className="hidden sm:inline-flex items-center gap-1.5 font-label text-xs text-secondary-600 hover:text-foreground-700 transition-colors duration-200 cursor-pointer"
+              >
+                <i className="ri-edit-line" style={{ fontSize: '14px' }}></i>
+                Editar evento
+              </button>
+            )}
             <button
               onClick={logout}
               className="flex items-center gap-1.5 font-label text-xs text-secondary-500 hover:text-red-600 transition-colors duration-200 cursor-pointer"

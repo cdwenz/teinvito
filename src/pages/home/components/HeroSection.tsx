@@ -26,7 +26,7 @@ export default function HeroSection({
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const imageCoverUrl = event.gallery?.find(img => img.position === 99)?.imageUrl || '';
+  const imageCoverUrl = event.gallery?.find(img => img.position === 99)?.imageUrl;
 
   return (
     <section
@@ -34,12 +34,14 @@ export default function HeroSection({
       className="relative w-full h-screen min-h-[600px] max-h-[900px] overflow-hidden"
     >
       {/* Background image + overlay */}
-      <div className="absolute inset-0">
-        <img
-          src={imageCoverUrl}
-          alt={event.celebratedPersonName}
-          className="w-full h-full object-cover object-top"
-        />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary-300 to-secondary-400">
+        {imageCoverUrl && (
+          <img
+            src={imageCoverUrl}
+            alt={event.celebratedPersonName}
+            className="w-full h-full object-cover object-top"
+          />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/20 to-black/50" />
       </div>
 
