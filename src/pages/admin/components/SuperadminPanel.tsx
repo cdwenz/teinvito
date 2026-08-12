@@ -12,6 +12,7 @@ import {
   type PendingUser,
   type Plan,
 } from '@/lib/api';
+import AdminTopBar from './AdminTopBar';
 
 interface SuperadminPanelProps {
   onBack: () => void;
@@ -195,18 +196,7 @@ export default function SuperadminPanel({ onBack }: SuperadminPanelProps) {
 
   return (
     <div className="min-h-screen bg-background-50">
-      <header className="bg-background-100 border-b border-background-300/50">
-        <div className="max-w-4xl mx-auto px-4 md:px-6 py-4 flex items-center justify-between">
-          <h1 className="font-label text-sm font-semibold text-foreground-900">Panel de Superadmin</h1>
-          <button
-            onClick={onBack}
-            className="flex items-center gap-1.5 font-label text-xs text-secondary-600 hover:text-foreground-700 transition-colors"
-          >
-            <i className="ri-arrow-left-line" style={{ fontSize: '14px' }}></i>
-            Volver
-          </button>
-        </div>
-      </header>
+      <AdminTopBar title="Panel de Superadmin" onBack={onBack} />
 
       <div className="max-w-4xl mx-auto px-4 md:px-6 py-8 space-y-8">
         {/* Pending reviews */}

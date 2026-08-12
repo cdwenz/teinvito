@@ -169,7 +169,14 @@ export default function Admin() {
     return (
       <>
         {superadminButton}
-        <CreateEventForm onCreated={loadEvents} />
+        <CreateEventForm
+          onCreated={loadEvents}
+          onCancel={
+            events.length > 0
+              ? () => setView(events.length > 1 ? 'picker' : 'dashboard')
+              : undefined
+          }
+        />
       </>
     );
   }
@@ -183,6 +190,10 @@ export default function Admin() {
           onCreated={() => {
             setEditingEvent(null);
             loadEvents();
+          }}
+          onCancel={() => {
+            setEditingEvent(null);
+            setView('dashboard');
           }}
         />
       </>

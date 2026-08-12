@@ -11,7 +11,7 @@ import {
   getRsvpStats,
 } from '@/lib/api';
 
-import { getInvitationUrl } from '@/lib/subdomain';
+import AdminTopBar from './AdminTopBar';
 
 import type {
   Event as EventType,
@@ -58,18 +58,6 @@ export default function Dashboard({ slug, onSwitchEvent, onEdit }: DashboardProp
       search: '',
       filter: 'all',
     });
-
-  const logout = () => {
-    sessionStorage.removeItem(
-      'access_token',
-    );
-
-    sessionStorage.removeItem(
-      'admin_authenticated',
-    );
-
-    window.location.href = '/';
-  };
 
   const refreshRsvps = useCallback(async (eventId: string) => {
     try {
@@ -192,56 +180,13 @@ export default function Dashboard({ slug, onSwitchEvent, onEdit }: DashboardProp
 
   return (
     <div className="min-h-screen bg-background-50">
-      {/* Top bar */}
-      <header className="bg-background-100 border-b border-background-300/50">
-        <div className="max-w-6xl mx-auto px-4 md:px-6 py-3 md:py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-primary-100 flex items-center justify-center">
-              <i className="ri-shield-keyhole-line text-primary-600" style={{ fontSize: '16px' }}></i>
-            </div>
-            <div>
-              <h1 className="font-label text-sm font-semibold text-foreground-900">Panel de Organización</h1>
-              <p className="font-label text-xs text-secondary-500">{event.title}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            {onSwitchEvent && (
-              <button
-                onClick={onSwitchEvent}
-                className="hidden sm:inline-flex items-center gap-1.5 font-label text-xs text-secondary-600 hover:text-foreground-700 transition-colors duration-200 cursor-pointer"
-              >
-                <i className="ri-arrow-left-right-line" style={{ fontSize: '14px' }}></i>
-                Cambiar evento
-              </button>
-            )}
-            <a
-              href={getInvitationUrl(slug)}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 font-label text-xs text-secondary-600 hover:text-foreground-700 transition-colors duration-200"
-            >
-              <i className="ri-external-link-line" style={{ fontSize: '14px' }}></i>
-              Ver invitación
-            </a>
-            {onEdit && (
-              <button
-                onClick={() => onEdit(event)}
-                className="hidden sm:inline-flex items-center gap-1.5 font-label text-xs text-secondary-600 hover:text-foreground-700 transition-colors duration-200 cursor-pointer"
-              >
-                <i className="ri-edit-line" style={{ fontSize: '14px' }}></i>
-                Editar evento
-              </button>
-            )}
-            <button
-              onClick={logout}
-              className="flex items-center gap-1.5 font-label text-xs text-secondary-500 hover:text-red-600 transition-colors duration-200 cursor-pointer"
-            >
-              <i className="ri-logout-box-line" style={{ fontSize: '14px' }}></i>
-              Cerrar sesión
-            </button>
-          </div>
-        </div>
-      </header>
+      <AdminTopBar
+        title="Panel de Organización"
+        subtitle={event.title}
+        invitationSlug={slug}
+        onSwitchEvent={onSwitchEvent}
+        onEdit={onEdit ? () => onEdit(event) : undefined}
+      />
 
       <div className="max-w-6xl mx-auto px-4 md:px-6 py-6 md:py-8">
         {/* Stats cards */}

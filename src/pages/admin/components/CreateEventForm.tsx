@@ -17,12 +17,14 @@ import {
 import type { Event } from '@/types/event';
 import LocationPicker from './LocationPicker';
 import InvitationPreview from './InvitationPreview';
+import AdminTopBar from './AdminTopBar';
 
 const SLUG_PATTERN = /^[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?$/;
 
 interface CreateEventFormProps {
   existingEvent?: Event;
   onCreated: () => void;
+  onCancel?: () => void;
 }
 
 type Step = 'basics' | 'venue' | 'gift' | 'gallery' | 'timeline' | 'music' | 'theme' | 'review';
@@ -144,7 +146,7 @@ function themeFromEvent(event: Event) {
   };
 }
 
-export default function CreateEventForm({ existingEvent, onCreated }: CreateEventFormProps) {
+export default function CreateEventForm({ existingEvent, onCreated, onCancel }: CreateEventFormProps) {
   const isEditing = !!existingEvent;
 
   const [stepIndex, setStepIndex] = useState(0);
@@ -351,12 +353,16 @@ export default function CreateEventForm({ existingEvent, onCreated }: CreateEven
   const labelClass = 'block font-label text-xs tracking-widest uppercase text-secondary-600 mb-2';
 
   return (
-    <div className="min-h-screen bg-background-50 flex items-center justify-center px-4 py-10">
+    <div className="min-h-screen bg-background-50">
+      <AdminTopBar
+        title={isEditing ? 'Editar evento' : 'Crear nuevo evento'}
+        invitationSlug={isEditing ? existingEvent!.slug : undefined}
+        onBack={onCancel}
+        backLabel={isEditing ? 'Volver al panel' : 'Cancelar'}
+      />
+      <div className="flex items-center justify-center px-4 py-10">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-6">
-          <h1 className="font-heading text-2xl text-foreground-900 font-light mb-1">
-            {isEditing ? 'Editar evento' : 'Crear nuevo evento'}
-          </h1>
           <p className="font-body text-foreground-500 text-sm">
             {isEditing ? 'Actualizá los datos de tu invitación' : 'Completá los datos para armar la invitación'}
           </p>
@@ -365,19 +371,21 @@ export default function CreateEventForm({ existingEvent, onCreated }: CreateEven
         {/* Step indicator */}
         <div className="flex items-center justify-center gap-1.5 mb-6 flex-wrap">
           {STEPS.map((s, i) => (
-            <div
+            <button
               key={s.key}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-label text-xs tracking-wide ${
+              type="button"
+              onClick={() => setStepIndex(i)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full font-label text-xs tracking-wide cursor-pointer transition-colors duration-200 ${
                 i === stepIndex
                   ? 'bg-primary-500 text-background-50'
                   : i < stepIndex
-                  ? 'bg-primary-100 text-primary-700'
-                  : 'bg-background-100 text-secondary-500'
+                  ? 'bg-primary-100 text-primary-700 hover:bg-primary-200'
+                  : 'bg-background-100 text-secondary-500 hover:bg-background-200'
               }`}
             >
               <i className={s.icon} style={{ fontSize: '12px' }}></i>
               {s.label}
-            </div>
+            </button>
           ))}
         </div>
 
@@ -820,6 +828,7 @@ export default function CreateEventForm({ existingEvent, onCreated }: CreateEven
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   );
